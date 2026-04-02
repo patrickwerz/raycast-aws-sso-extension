@@ -1,9 +1,29 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  getPreferenceValues,
+} from "@raycast/api";
+import { useEffect, useState, useCallback } from "react";
 import type { AccountGroup, SSOProfile } from "../lib/types";
-import { getDirectConsoleUrl, getDirectConsoleUrlWithRegion, getSSOPortalUrl, getExportCommand, AWS_REGIONS } from "../lib/url-builder";
+import {
+  getDirectConsoleUrl,
+  getDirectConsoleUrlWithRegion,
+  getSSOPortalUrl,
+  getExportCommand,
+  AWS_REGIONS,
+} from "../lib/url-builder";
 import { openUrl } from "../lib/browser";
-import { loadUsageCounts, trackUsage, getUsageCount, type UsageData } from "../lib/usage-tracker";
+import {
+  loadUsageCounts,
+  trackUsage,
+  getUsageCount,
+  type UsageData,
+} from "../lib/usage-tracker";
 
 /**
  * Map role names to colors.
@@ -12,7 +32,12 @@ function getRoleColor(roleName: string): Color {
   const lower = roleName.toLowerCase();
   if (lower.includes("admin")) return Color.Red;
   if (lower.includes("poweruser")) return Color.Orange;
-  if (lower.includes("readonly") || lower.includes("read-only") || lower.includes("viewonly")) return Color.Green;
+  if (
+    lower.includes("readonly") ||
+    lower.includes("read-only") ||
+    lower.includes("viewonly")
+  )
+    return Color.Green;
   if (lower.includes("developer") || lower.includes("dev")) return Color.Blue;
   return Color.PrimaryText;
 }
@@ -23,7 +48,12 @@ function getRoleColor(roleName: string): Color {
 function getRoleIcon(roleName: string): Icon {
   const lower = roleName.toLowerCase();
   if (lower.includes("admin")) return Icon.Shield;
-  if (lower.includes("readonly") || lower.includes("read-only") || lower.includes("viewonly")) return Icon.Eye;
+  if (
+    lower.includes("readonly") ||
+    lower.includes("read-only") ||
+    lower.includes("viewonly")
+  )
+    return Icon.Eye;
   if (lower.includes("developer") || lower.includes("dev")) return Icon.Code;
   if (lower.includes("poweruser")) return Icon.Bolt;
   return Icon.Person;
@@ -33,7 +63,10 @@ function getRoleIcon(roleName: string): Icon {
  * Format a role name for display — strip common prefixes like "AWS".
  */
 function formatRoleName(roleName: string): string {
-  return roleName.replace(/^AWS/, "").replace(/Access$/, " Access").trim();
+  return roleName
+    .replace(/^AWS/, "")
+    .replace(/Access$/, " Access")
+    .trim();
 }
 
 /**
@@ -91,8 +124,18 @@ export function RoleList({ account }: RoleListProps) {
   const sortedRoles = useCallback(
     (region: string) => {
       return [...account.roles].sort((a, b) => {
-        const countA = getUsageCount(usageData, account.accountId, a.ssoRoleName, region);
-        const countB = getUsageCount(usageData, account.accountId, b.ssoRoleName, region);
+        const countA = getUsageCount(
+          usageData,
+          account.accountId,
+          a.ssoRoleName,
+          region,
+        );
+        const countB = getUsageCount(
+          usageData,
+          account.accountId,
+          b.ssoRoleName,
+          region,
+        );
         return countB - countA;
       });
     },
@@ -109,9 +152,10 @@ export function RoleList({ account }: RoleListProps) {
         <List.Section
           key={region}
           title={hasMultipleRegions ? region : account.displayName}
-          subtitle={hasMultipleRegions
-            ? `${account.roles.length} roles`
-            : `Account ${account.accountId} · ${account.roles.length} role${account.roles.length > 1 ? "s" : ""}`
+          subtitle={
+            hasMultipleRegions
+              ? `${account.roles.length} roles`
+              : `Account ${account.accountId} · ${account.roles.length} role${account.roles.length > 1 ? "s" : ""}`
           }
         >
           {sortedRoles(region).map((profile) => (
@@ -120,7 +164,12 @@ export function RoleList({ account }: RoleListProps) {
               profile={profile}
               region={region}
               isDefault={region === (profile.region || "us-east-1")}
-              usageCount={getUsageCount(usageData, account.accountId, profile.ssoRoleName, region)}
+              usageCount={getUsageCount(
+                usageData,
+                account.accountId,
+                profile.ssoRoleName,
+                region,
+              )}
               onUsageTracked={refreshUsage}
             />
           ))}
@@ -138,12 +187,23 @@ interface RoleListItemProps {
   onUsageTracked: () => void;
 }
 
-function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }: RoleListItemProps) {
+function RoleListItem({
+  profile,
+  region,
+  isDefault,
+  usageCount,
+  onUsageTracked,
+}: RoleListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
-  const { showUsageCount } = getPreferenceValues<{ showUsageCount?: boolean }>();
+  const { showUsageCount } = getPreferenceValues<{
+    showUsageCount?: boolean;
+  }>();
   if (showUsageCount && usageCount > 0) {
-    accessories.push({ tag: { value: `${usageCount}×`, color: Color.Purple }, tooltip: `Opened ${usageCount} time${usageCount > 1 ? "s" : ""}` });
+    accessories.push({
+      tag: { value: `${usageCount}×`, color: Color.Purple },
+      tooltip: `Opened ${usageCount} time${usageCount > 1 ? "s" : ""}`,
+    });
   }
 
   accessories.push({
@@ -155,7 +215,11 @@ function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }
     accessories.push({ icon: Icon.Star, tooltip: "Default region" });
   }
 
-  accessories.push({ text: profile.profileName, icon: Icon.Terminal, tooltip: "Profile name" });
+  accessories.push({
+    text: profile.profileName,
+    icon: Icon.Terminal,
+    tooltip: "Profile name",
+  });
 
   const consoleUrl = isDefault
     ? getDirectConsoleUrl(profile)
@@ -169,7 +233,11 @@ function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }
         onUsageTracked();
       }
     } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to open browser", message: String(e) });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to open browser",
+        message: String(e),
+      });
     }
   };
 
@@ -177,7 +245,10 @@ function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }
     <List.Item
       title={formatRoleName(profile.ssoRoleName)}
       subtitle={profile.ssoRoleName}
-      icon={{ source: getRoleIcon(profile.ssoRoleName), tintColor: getRoleColor(profile.ssoRoleName) }}
+      icon={{
+        source: getRoleIcon(profile.ssoRoleName),
+        tintColor: getRoleColor(profile.ssoRoleName),
+      }}
       keywords={[profile.profileName, profile.ssoRoleName, region]}
       accessories={accessories}
       actions={
@@ -189,7 +260,7 @@ function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }
               onAction={() => handleOpen(consoleUrl)}
             />
             <Action
-              title="Open SSO Portal"
+              title="Open Sso Portal"
               icon={Icon.Link}
               onAction={() => handleOpen(getSSOPortalUrl(profile), false)}
             />
@@ -204,13 +275,15 @@ function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }
                 key={r.value}
                 title={`${r.label} (${r.value})`}
                 icon={r.value === region ? Icon.CheckCircle : Icon.Circle}
-                onAction={() => handleOpen(getDirectConsoleUrlWithRegion(profile, r.value))}
+                onAction={() =>
+                  handleOpen(getDirectConsoleUrlWithRegion(profile, r.value))
+                }
               />
             ))}
           </ActionPanel.Submenu>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy Account ID"
+              title="Copy Account Id"
               content={profile.ssoAccountId}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -232,7 +305,7 @@ function RoleListItem({ profile, region, isDefault, usageCount, onUsageTracked }
           </ActionPanel.Section>
           <ActionPanel.Section title="Login">
             <Action
-              title="SSO Login in Browser"
+              title="Sso Login in Browser"
               icon={Icon.Key}
               shortcut={{ modifiers: ["cmd"], key: "l" }}
               onAction={() => handleOpen(profile.ssoStartUrl)}

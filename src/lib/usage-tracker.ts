@@ -12,7 +12,11 @@ export interface UsageData {
 /**
  * Build a composite key for tracking usage of a specific role in a specific region.
  */
-export function usageKey(accountId: string, roleName: string, region: string): string {
+export function usageKey(
+  accountId: string,
+  roleName: string,
+  region: string,
+): string {
   return `${accountId}:${roleName}:${region}`;
 }
 
@@ -32,7 +36,11 @@ export async function loadUsageCounts(): Promise<UsageData> {
 /**
  * Increment the usage count for a specific role+region combination.
  */
-export async function trackUsage(accountId: string, roleName: string, region: string): Promise<void> {
+export async function trackUsage(
+  accountId: string,
+  roleName: string,
+  region: string,
+): Promise<void> {
   const counts = await loadUsageCounts();
   const key = usageKey(accountId, roleName, region);
   counts[key] = (counts[key] || 0) + 1;
@@ -42,14 +50,22 @@ export async function trackUsage(accountId: string, roleName: string, region: st
 /**
  * Get the usage count for a specific role+region combination.
  */
-export function getUsageCount(data: UsageData, accountId: string, roleName: string, region: string): number {
+export function getUsageCount(
+  data: UsageData,
+  accountId: string,
+  roleName: string,
+  region: string,
+): number {
   return data[usageKey(accountId, roleName, region)] || 0;
 }
 
 /**
  * Get the total usage count for an entire account (sum of all role+region combos for that account).
  */
-export function getAccountUsageCount(data: UsageData, accountId: string): number {
+export function getAccountUsageCount(
+  data: UsageData,
+  accountId: string,
+): number {
   const prefix = `${accountId}:`;
   let total = 0;
   for (const [key, count] of Object.entries(data)) {

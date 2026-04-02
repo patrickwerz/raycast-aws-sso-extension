@@ -1,27 +1,35 @@
-import { List, showToast, Toast, getPreferenceValues, Icon, showHUD } from "@raycast/api";
+import {
+  List,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Icon,
+  showHUD,
+} from "@raycast/api";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { parseAWSConfig, groupByAccount } from "./lib/aws-config";
 import { AccountListItem } from "./components/ProfileListItem";
 import { getDirectConsoleUrl } from "./lib/url-builder";
 import { openUrl } from "./lib/browser";
 import type { AccountGroup } from "./lib/types";
-import { loadUsageCounts, getAccountUsageCount, type UsageData } from "./lib/usage-tracker";
+import {
+  loadUsageCounts,
+  getAccountUsageCount,
+  type UsageData,
+} from "./lib/usage-tracker";
 
 interface Preferences {
   awsConfigPath?: string;
 }
 
-interface LaunchArguments {
-  search?: string;
-}
-
 const MAX_MULTI_SESSIONS = 5;
 
-export default function ListProfiles(props: { arguments: LaunchArguments }) {
-  const initialSearch = props.arguments.search || "";
+export default function ListProfiles() {
   const preferences = getPreferenceValues<Preferences>();
   const configPath = preferences.awsConfigPath || "~/.aws/config";
-  const [selectedAccounts, setSelectedAccounts] = useState<Set<string>>(new Set());
+  const [selectedAccounts, setSelectedAccounts] = useState<Set<string>>(
+    new Set(),
+  );
   const [usageData, setUsageData] = useState<UsageData>({});
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
@@ -55,31 +63,30 @@ export default function ListProfiles(props: { arguments: LaunchArguments }) {
     });
   }, [accountGroups, usageData]);
 
-  const toggleSelection = useCallback(
-    (accountId: string) => {
-      setSelectedAccounts((prev) => {
-        const next = new Set(prev);
-        if (next.has(accountId)) {
-          next.delete(accountId);
-        } else {
-          if (next.size >= MAX_MULTI_SESSIONS) {
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Multi-Session Limit",
-              message: `AWS supports up to ${MAX_MULTI_SESSIONS} simultaneous sessions`,
-            });
-            return prev;
-          }
-          next.add(accountId);
+  const toggleSelection = useCallback((accountId: string) => {
+    setSelectedAccounts((prev) => {
+      const next = new Set(prev);
+      if (next.has(accountId)) {
+        next.delete(accountId);
+      } else {
+        if (next.size >= MAX_MULTI_SESSIONS) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Multi-Session Limit",
+            message: `AWS supports up to ${MAX_MULTI_SESSIONS} simultaneous sessions`,
+          });
+          return prev;
         }
-        return next;
-      });
-    },
-    [],
-  );
+        next.add(accountId);
+      }
+      return next;
+    });
+  }, []);
 
   const openSelectedAccounts = useCallback(async () => {
-    const selected = accountGroups.filter((g) => selectedAccounts.has(g.accountId));
+    const selected = accountGroups.filter((g) =>
+      selectedAccounts.has(g.accountId),
+    );
     if (selected.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
@@ -96,12 +103,18 @@ export default function ListProfiles(props: { arguments: LaunchArguments }) {
       try {
         openUrl(getDirectConsoleUrl(defaultProfile));
       } catch (e) {
-        await showToast({ style: Toast.Style.Failure, title: "Failed to open browser", message: String(e) });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open browser",
+          message: String(e),
+        });
       }
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
 
-    await showHUD(`🚀 Opened ${toOpen.length} AWS console session${toOpen.length > 1 ? "s" : ""}`);
+    await showHUD(
+      `🚀 Opened ${toOpen.length} AWS console session${toOpen.length > 1 ? "s" : ""}`,
+    );
     setSelectedAccounts(new Set());
   }, [accountGroups, selectedAccounts]);
 
@@ -124,11 +137,7 @@ export default function ListProfiles(props: { arguments: LaunchArguments }) {
       : "Search AWS SSO accounts… (⌘S to select for multi-session)";
 
   return (
-    <List
-      searchBarPlaceholder={searchPlaceholder}
-      defaultSearchText={initialSearch}
-      isLoading={isLoadingUsage}
-    >
+    <List searchBarPlaceholder={searchPlaceholder} isLoading={isLoadingUsage}>
       {sortedAccountGroups.length === 0 && !error && (
         <List.EmptyView
           title="No SSO Accounts Found"
@@ -138,7 +147,11 @@ export default function ListProfiles(props: { arguments: LaunchArguments }) {
       )}
 
       {error && (
-        <List.EmptyView title="Error Loading Config" description={error} icon={Icon.XMarkCircle} />
+        <List.EmptyView
+          title="Error Loading Config"
+          description={error}
+          icon={Icon.XMarkCircle}
+        />
       )}
 
       {sortedAccountGroups.map((account) => (

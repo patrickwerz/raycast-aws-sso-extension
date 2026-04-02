@@ -33,7 +33,10 @@ export function getDirectConsoleUrl(profile: SSOProfile): string {
  * Build a direct console URL for a specific region override.
  * Opens the SSO federation with the given account/role, landing in the specified region.
  */
-export function getDirectConsoleUrlWithRegion(profile: SSOProfile, region: string): string {
+export function getDirectConsoleUrlWithRegion(
+  profile: SSOProfile,
+  region: string,
+): string {
   const baseUrl = profile.ssoStartUrl.replace(/\/$/, "");
   const params = new URLSearchParams({
     account_id: profile.ssoAccountId,

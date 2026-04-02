@@ -53,7 +53,9 @@ function parseIni(content: string): Record<string, Record<string, string>> {
 /**
  * Parse the AWS config file and extract SSO sessions and profiles.
  */
-export function parseAWSConfig(configPath: string = "~/.aws/config"): AWSConfig {
+export function parseAWSConfig(
+  configPath: string = "~/.aws/config",
+): AWSConfig {
   const resolvedPath = resolvePath(configPath);
   const content = readFileSync(resolvedPath, "utf-8");
   const parsed = parseIni(content);

@@ -4,7 +4,7 @@
   "title": "AWS SSO Profiles",
   "description": "Quickly switch between AWS SSO accounts by opening them in the browser",
   "icon": "icon.png",
-  "author": "patrick-werz",
+  "author": "patrickwerz",
   "platforms": [
     "macOS"
   ],
@@ -26,14 +26,6 @@
         "profiles",
         "console",
         "switch"
-      ],
-      "arguments": [
-        {
-          "name": "search",
-          "type": "text",
-          "required": false,
-          "placeholder": "Search accounts (e.g. showpad)"
-        }
       ]
     }
   ],

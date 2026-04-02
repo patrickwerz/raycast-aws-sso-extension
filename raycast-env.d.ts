@@ -26,9 +26,6 @@ declare namespace Preferences {
 
 declare namespace Arguments {
   /** Arguments passed to the `list-profiles` command */
-  export type ListProfiles = {
-  /** Search accounts (e.g. showpad) */
-  "search": string
-}
+  export type ListProfiles = {}
 }
 
