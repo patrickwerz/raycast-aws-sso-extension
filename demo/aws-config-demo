@@ -1,0 +1,93 @@
+# =============================================================================
+# Demo AWS SSO Config — showcases all extension features
+# Place this at ~/.aws/config (or point the extension preference to this file)
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# SSO Session (shared by all profiles)
+# ---------------------------------------------------------------------------
+[sso-session acme-sso]
+sso_start_url = https://acme-corp.awsapps.com/start/
+sso_region = us-east-1
+sso_registration_scopes = sso:account:access
+
+# ---------------------------------------------------------------------------
+# 🔴 Production — stage auto-detected, multiple roles (Admin, ReadOnly, PowerUser)
+# ---------------------------------------------------------------------------
+[profile AdministratorAccess-acme-production]
+sso_session = acme-sso
+sso_account_id = 111122223333
+sso_role_name = AdministratorAccess
+region = us-east-1
+
+[profile ReadOnlyAccess-acme-production]
+sso_session = acme-sso
+sso_account_id = 111122223333
+sso_role_name = ReadOnlyAccess
+region = us-east-1
+
+[profile PowerUserAccess-acme-production]
+sso_session = acme-sso
+sso_account_id = 111122223333
+sso_role_name = PowerUserAccess
+region = us-east-1
+
+# ---------------------------------------------------------------------------
+# 🟡 Staging — stage auto-detected, two roles
+# ---------------------------------------------------------------------------
+[profile AdministratorAccess-acme-staging]
+sso_session = acme-sso
+sso_account_id = 444455556666
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile DeveloperAccess-acme-staging]
+sso_session = acme-sso
+sso_account_id = 444455556666
+sso_role_name = DeveloperAccess
+region = eu-west-1
+
+# ---------------------------------------------------------------------------
+# 🟢 Development — stage auto-detected, single role
+# ---------------------------------------------------------------------------
+[profile DeveloperAccess-acme-dev]
+sso_session = acme-sso
+sso_account_id = 777788889999
+sso_role_name = DeveloperAccess
+region = eu-central-1
+
+# ---------------------------------------------------------------------------
+# 🟠 QA / Testing — stage auto-detected
+# ---------------------------------------------------------------------------
+[profile ReadOnlyAccess-acme-qa]
+sso_session = acme-sso
+sso_account_id = 123456789012
+sso_role_name = ReadOnlyAccess
+region = us-west-2
+
+# ---------------------------------------------------------------------------
+# 🔧 Tooling — stage auto-detected
+# ---------------------------------------------------------------------------
+[profile AdministratorAccess-acme-tooling]
+sso_session = acme-sso
+sso_account_id = 998877665544
+sso_role_name = AdministratorAccess
+region = us-east-1
+
+# ---------------------------------------------------------------------------
+# 🏖️ Sandbox — stage auto-detected, good for demos
+# ---------------------------------------------------------------------------
+[profile AdministratorAccess-acme-sandbox]
+sso_session = acme-sso
+sso_account_id = 112233445566
+sso_role_name = AdministratorAccess
+region = ap-southeast-1
+
+# ---------------------------------------------------------------------------
+# 📦 Shared Services — no stage detected (neutral icon)
+# ---------------------------------------------------------------------------
+[profile ReadOnlyAccess-shared-services]
+sso_session = acme-sso
+sso_account_id = 667788990011
+sso_role_name = ReadOnlyAccess
+region = us-east-1
